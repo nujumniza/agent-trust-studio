@@ -33,7 +33,7 @@ export const Route = createFileRoute("/run")({
 
 function RunPage() {
   const navigate = useNavigate();
-  const [taskSetId, setTaskSetId] = useState(TASK_SETS[0].id);
+  const [taskSetId, setTaskSetId] = useState(TASK_SETS[0]!.id);
   const [prompt, setPrompt] = useState(
     "Resolve a damaged-item refund and re-ship the replacement.",
   );

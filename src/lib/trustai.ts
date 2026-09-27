@@ -258,7 +258,7 @@ export function runEvaluation(input: {
   taskPrompt: string;
   config: AgentConfig;
 }): EvalRun {
-  const taskSet = TASK_SETS.find((t) => t.id === input.taskSetId) ?? TASK_SETS[0];
+  const taskSet = TASK_SETS.find((t) => t.id === input.taskSetId) ?? TASK_SETS[0]!;
   const seedString = `${taskSet.id}|${input.taskPrompt}|${JSON.stringify(input.config)}`;
   const seedNum = hash(seedString);
   const random = rng(seedNum);
