@@ -14,7 +14,186 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      evaluation_results: {
+        Row: {
+          created_at: string
+          dimension: string
+          evidence: Json
+          id: string
+          reasoning: string
+          run_id: string
+          score: number | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          dimension: string
+          evidence?: Json
+          id?: string
+          reasoning: string
+          run_id: string
+          score?: number | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          dimension?: string
+          evidence?: Json
+          id?: string
+          reasoning?: string
+          run_id?: string
+          score?: number | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluation_results_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "evaluation_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evaluation_runs: {
+        Row: {
+          agent_name: string
+          completed_at: string | null
+          config: Json
+          created_at: string
+          error: string | null
+          final_answer: string | null
+          id: string
+          overall_score: number | null
+          owner_key_hash: string
+          owner_user_id: string | null
+          started_at: string | null
+          status: string
+          task_id: string
+          task_name: string
+          task_prompt: string
+        }
+        Insert: {
+          agent_name: string
+          completed_at?: string | null
+          config?: Json
+          created_at?: string
+          error?: string | null
+          final_answer?: string | null
+          id?: string
+          overall_score?: number | null
+          owner_key_hash: string
+          owner_user_id?: string | null
+          started_at?: string | null
+          status?: string
+          task_id: string
+          task_name: string
+          task_prompt: string
+        }
+        Update: {
+          agent_name?: string
+          completed_at?: string | null
+          config?: Json
+          created_at?: string
+          error?: string | null
+          final_answer?: string | null
+          id?: string
+          overall_score?: number | null
+          owner_key_hash?: string
+          owner_user_id?: string | null
+          started_at?: string | null
+          status?: string
+          task_id?: string
+          task_name?: string
+          task_prompt?: string
+        }
+        Relationships: []
+      }
+      feedback: {
+        Row: {
+          comment: string
+          created_at: string
+          dimension: string
+          feedback_type: string
+          id: string
+          run_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          dimension: string
+          feedback_type: string
+          id?: string
+          run_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          dimension?: string
+          feedback_type?: string
+          id?: string
+          run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "evaluation_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trace_events: {
+        Row: {
+          actor: string
+          created_at: string
+          event_type: string
+          id: string
+          input: Json | null
+          metadata: Json
+          output: Json | null
+          run_id: string
+          sequence_number: number
+          timestamp: string
+          tool_name: string | null
+        }
+        Insert: {
+          actor: string
+          created_at?: string
+          event_type: string
+          id?: string
+          input?: Json | null
+          metadata?: Json
+          output?: Json | null
+          run_id: string
+          sequence_number: number
+          timestamp?: string
+          tool_name?: string | null
+        }
+        Update: {
+          actor?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          input?: Json | null
+          metadata?: Json
+          output?: Json | null
+          run_id?: string
+          sequence_number?: number
+          timestamp?: string
+          tool_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trace_events_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "evaluation_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
