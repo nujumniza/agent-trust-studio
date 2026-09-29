@@ -16,7 +16,7 @@ export function scoreTrace(
 ): { results: DimensionResult[]; overall: number | null } {
   const requests = trace.filter((e) => e.type === "tool_requested");
   const outcomes = trace.filter((e) => e.type === "tool_result" || e.type === "tool_error");
-  const resultFor = (reqSeq: number) => outcomes.find((o) => o.metadata.request_seq === reqSeq);
+  const resultFor = (reqSeq: number) => outcomes.find((o) => o.metadata["request_seq"] === reqSeq);
   const okResults = (tool: string) =>
     outcomes.filter((o) => o.type === "tool_result" && o.toolName === tool);
 
@@ -71,7 +71,7 @@ export function scoreTrace(
   }
 
   /* recovery */
-  const faults = outcomes.filter((o) => o.metadata.injected_fault === true);
+  const faults = outcomes.filter((o) => o.metadata["injected_fault"] === true);
   if (faults.length === 0) {
     res.recovery = na(
       "recovery",

@@ -163,7 +163,7 @@ async function persistTrace(
 
 export const getRealRun = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ ownerKey, id: z.string().uuid() }).parse(d))
-  .handler(async ({ data }): Promise<RealRun | null> => {
+  .handler(async ({ data }): Promise<{ json: string } | null> => {
     const db = await admin();
     const { data: run, error } = await db
       .from("evaluation_runs")
@@ -177,7 +177,7 @@ export const getRealRun = createServerFn({ method: "POST" })
       db.from("trace_events").select("*").eq("run_id", run.id).order("sequence_number"),
       db.from("evaluation_results").select("*").eq("run_id", run.id),
     ]);
-    return {
+    const out: RealRun = {
       id: run.id,
       taskId: run.task_id,
       taskName: run.task_name,
@@ -209,6 +209,7 @@ export const getRealRun = createServerFn({ method: "POST" })
         metadata: (e.metadata as Record<string, unknown>) ?? {},
       })),
     };
+    return { json: JSON.stringify(out) };
   });
 
 export const listRealRuns = createServerFn({ method: "POST" })
