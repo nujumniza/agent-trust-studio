@@ -118,7 +118,7 @@ function makeToolRunner(config: RealAgentConfig) {
         return { ok: true, valid: true, output: { sku: ORDER.sku, in_stock: 12 } };
       }
       case "issue_refund": {
-        const amount = typeof args.amount === "number" ? args.amount : NaN;
+        const amount = typeof args["amount"] === "number" ? args["amount"] : NaN;
         if (str("order_id") !== ORDER.order_id || !Number.isFinite(amount) || amount <= 0)
           return { ok: false, valid: false, output: { error: "invalid_refund_request" } };
         if (amount > ORDER.unit_price * ORDER.quantity)
@@ -133,7 +133,7 @@ function makeToolRunner(config: RealAgentConfig) {
         };
       }
       case "create_shipment": {
-        const q = args.quantity;
+        const q = args["quantity"];
         if (str("order_id") !== ORDER.order_id || str("sku") !== ORDER.sku || q !== 1)
           return { ok: false, valid: false, output: { error: "invalid_shipment_request" } };
         return { ok: true, valid: true, output: { shipment_id: "SHP-0001", eta_days: 3 } };
@@ -191,7 +191,8 @@ async function callModel(
       include: ["reasoning.encrypted_content"],
     }),
   });
-  runIdRef.id ??= res.headers.get("X-Lovable-AIG-Run-ID") ?? undefined;
+  const rid = res.headers.get("X-Lovable-AIG-Run-ID");
+  if (!runIdRef.id && rid) runIdRef.id = rid;
 
   if (!res.ok || !res.body) {
     const text = await res.text().catch(() => "");
@@ -233,10 +234,10 @@ async function callModel(
         } catch {
           continue;
         }
-        if (evt.type === "response.completed") output = evt.response?.output ?? [];
-        if (evt.type === "response.failed" || evt.type === "error") {
+        if (evt["type"] === "response.completed") output = evt["response"]?.output ?? [];
+        if (evt["type"] === "response.failed" || evt["type"] === "error") {
           throw new AgentError(
-            `Model run failed: ${evt.response?.error?.message ?? evt.message ?? "unknown error"}`,
+            `Model run failed: ${evt["response"]?.error?.message ?? evt["message"] ?? "unknown error"}`,
             "gateway",
           );
         }
@@ -310,7 +311,7 @@ export async function runAgent(opts: {
       const calls = output.filter((o) => o.type === "function_call");
       const texts = output
         .filter((o) => o.type === "message")
-        .flatMap((m) => (m.content as Array<{ type: string; text?: string }>) ?? [])
+        .flatMap((m) => (m["content"] as Array<{ type: string; text?: string }>) ?? [])
         .filter((c) => c.type === "output_text")
         .map((c) => c.text ?? "")
         .join("\n")
@@ -330,11 +331,11 @@ export async function runAgent(opts: {
       }
 
       for (const call of calls) {
-        const name = String(call.name);
+        const name = String(call["name"]);
         let args: Record<string, unknown> = {};
         let parsed = true;
         try {
-          args = JSON.parse(String(call.arguments ?? "{}"));
+          args = JSON.parse(String(call["arguments"] ?? "{}"));
         } catch {
           parsed = false;
         }
@@ -352,7 +353,7 @@ export async function runAgent(opts: {
           toolName: name,
           input: args,
           output: null,
-          metadata: { turn, call_id: call.call_id },
+          metadata: { turn, call_id: call["call_id"] },
         });
         const outcome = parsed
           ? runTool(name, args)
@@ -372,7 +373,7 @@ export async function runAgent(opts: {
         });
         input.push({
           type: "function_call_output",
-          call_id: call.call_id,
+          call_id: call["call_id"],
           output: JSON.stringify(outcome.output),
         });
       }
