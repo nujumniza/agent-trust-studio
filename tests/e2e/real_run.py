@@ -15,7 +15,7 @@ async def main():
             if await launch.count(): break
             await pg.wait_for_timeout(500)
         await expect(launch).to_be_visible(); await expect(launch).to_be_enabled()
-        await expect(pg.get_by_text("openai/gpt-6-astra (via Lovable AI)")).to_be_attached()
+        await expect(pg.locator("input[readonly]").first).to_have_value("openai/gpt-6-astra (via Lovable AI)")
         print("PASS launch button visible+enabled in real mode")
         await launch.click()
         await pg.wait_for_url("**/dashboard/*-*-*", timeout=170000)
