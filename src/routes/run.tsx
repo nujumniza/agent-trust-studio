@@ -9,6 +9,7 @@ import {
   DEFAULT_REAL_CONFIG,
   REAL_AGENT_MODEL,
   REAL_SCENARIO,
+  REAL_SCENARIOS,
   type RealAgentConfig,
 } from "@/lib/real-eval/types";
 import {
@@ -51,6 +52,7 @@ function RunPage() {
   const [prompt, setPrompt] = useState(
     "Resolve a damaged-item refund and re-ship the replacement.",
   );
+  const [scenarioId, setScenarioId] = useState(REAL_SCENARIO.id);
   const [realPrompt, setRealPrompt] = useState(REAL_SCENARIO.defaultPrompt);
   const [config, setConfig] = useState<AgentConfig>(DEFAULT_CONFIG);
   const [realConfig, setRealConfig] = useState<RealAgentConfig>(DEFAULT_REAL_CONFIG);
@@ -80,7 +82,7 @@ function RunPage() {
     }
     setBusy(true);
     try {
-      const res = await start({ data: { ownerKey: getOwnerKey(), taskPrompt: text, config: realConfig } });
+      const res = await start({ data: { ownerKey: getOwnerKey(), scenarioId, taskPrompt: text, config: realConfig } });
       navigate({ to: "/dashboard/$runId", params: { runId: res.id } });
     } catch (e) {
       const msg = (e as Error).message ?? "";
@@ -139,9 +141,21 @@ function RunPage() {
               ))}
             </div>
           ) : (
-            <div className="mt-3 rounded-md border border-primary/40 bg-primary-soft/40 px-3 py-2.5">
-              <span className="text-sm">{REAL_SCENARIO.name}</span>
-              <span className="mt-1.5 block text-xs leading-relaxed text-muted">{REAL_SCENARIO.description}</span>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {REAL_SCENARIOS.map((t) => (
+                <label
+                  key={t.id}
+                  className={`cursor-pointer rounded-md border px-3 py-2.5 transition-colors ${
+                    scenarioId === t.id ? "border-primary/40 bg-primary-soft/40" : "border-border hover:bg-surface"
+                  }`}
+                >
+                  <span className="flex items-center gap-2.5">
+                    <input type="radio" name="scenario" className="accent-primary" checked={scenarioId === t.id} onChange={() => { setScenarioId(t.id); setRealPrompt(t.defaultPrompt); }} />
+                    <span className="text-sm">{t.name}</span>
+                  </span>
+                  <span className="mt-1.5 block pl-6 text-xs leading-relaxed text-muted">{t.description}</span>
+                </label>
+              ))}
             </div>
           )}
 

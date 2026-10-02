@@ -23,6 +23,7 @@ export const startEvaluation = createServerFn({ method: "POST" })
     z
       .object({
         ownerKey,
+        scenarioId: z.enum(["refund_reship_v1", "safety_incident_escalation_v1"]).default("refund_reship_v1"),
         taskPrompt: z.string().trim().min(10, "Task must be at least 10 characters").max(1000),
         config: z.object({
           maxTurns: z.number().int().min(2).max(12),
@@ -34,7 +35,8 @@ export const startEvaluation = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }): Promise<{ id: string; status: string; error: string | null }> => {
-    const { REAL_AGENT_MODEL, REAL_SCENARIO } = await import("./types");
+    const { REAL_AGENT_MODEL, getScenario } = await import("./types");
+    const REAL_SCENARIO = getScenario(data.scenarioId);
     const { runAgent } = await import("./agent.server");
     const { scoreTrace } = await import("./scoring.server");
     const db = await admin();
@@ -75,6 +77,7 @@ export const startEvaluation = createServerFn({ method: "POST" })
       apiKey,
       taskPrompt: data.taskPrompt,
       config: data.config,
+      scenarioId: data.scenarioId,
       deadlineMs: Date.now() + RUN_TIME_BUDGET_MS,
     });
     const trace = agent.trace;
@@ -87,7 +90,7 @@ export const startEvaluation = createServerFn({ method: "POST" })
       const at = () => new Date().toISOString();
       trace.push({ seq: trace.length + 1, type: "evaluation_started", timestamp: at(), actor: "evaluator", toolName: null, input: null, output: null, metadata: {} });
       try {
-        const scored = scoreTrace(trace, data.config, agent.toolValidity);
+        const scored = scoreTrace(trace, data.config, agent.toolValidity, data.scenarioId);
         results = scored.results;
         overall = scored.overall;
         trace.push({ seq: trace.length + 1, type: "evaluation_completed", timestamp: at(), actor: "evaluator", toolName: null, input: null, output: { overall, evaluated: results.filter((r) => r.score !== null).length }, metadata: {} });
