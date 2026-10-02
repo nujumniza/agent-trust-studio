@@ -302,8 +302,13 @@ export async function runAgent(opts: {
   taskPrompt: string;
   config: RealAgentConfig;
   deadlineMs: number;
+  scenarioId?: string;
 }): Promise<AgentRunResult> {
   const { config } = opts;
+  const truth = truthFor(opts.scenarioId ?? "refund_reship_v1");
+  const system = truth.extraPolicy
+    ? SYSTEM.replace("When finished,", `${truth.extraPolicy}\nWhen finished,`)
+    : SYSTEM;
   const trace: TraceEvent[] = [];
   const toolValidity: Record<number, boolean> = {};
   const push = (e: Omit<TraceEvent, "seq" | "timestamp">) => {
@@ -318,13 +323,13 @@ export async function runAgent(opts: {
     toolName: null,
     input: { task: opts.taskPrompt },
     output: null,
-    metadata: { model: REAL_AGENT_MODEL, config },
+    metadata: { model: REAL_AGENT_MODEL, config, scenario_id: opts.scenarioId ?? "refund_reship_v1" },
   });
 
   const tools = config.toolsEnabled ? toolDefs(config) : [];
   const runTool = makeToolRunner(config);
   const input: unknown[] = [
-    { role: "developer", content: SYSTEM },
+    { role: "developer", content: system },
     { role: "user", content: opts.taskPrompt },
   ];
   const runIdRef: { id?: string } = {};
