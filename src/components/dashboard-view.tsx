@@ -23,8 +23,8 @@ export function DashboardView({ run }: { run: EvalRun }) {
             </h1>
           </div>
           <span className="font-mono text-[11px] text-muted">
-            demo · agent label: {run.config.model} · task set: {run.taskCount} (not executed) · seed: {run.seed} ·{" "}
-            {formatDate(run.createdAt)}
+            demo · agent label: {run.config.model} · task set: {run.taskCount} (not executed) ·
+            seed: {run.seed} · {formatDate(run.createdAt)}
           </span>
         </div>
 
@@ -50,9 +50,7 @@ export function DashboardView({ run }: { run: EvalRun }) {
               <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted">
                 Evidence / trace · illustrative
               </span>
-              <span className="font-mono text-[11px] text-faint">
-                {run.evidence.length} spans
-              </span>
+              <span className="font-mono text-[11px] text-faint">{run.evidence.length} spans</span>
             </div>
             <EvidenceTrace run={run} />
           </Panel>
