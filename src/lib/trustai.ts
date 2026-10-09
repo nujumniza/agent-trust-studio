@@ -241,14 +241,14 @@ function evidenceFor(
   };
 
   const tagSets: Record<DimensionId, string[]> = {
-    task_success: ["goal_state", `tasks:${Math.round(score * 40)}/40`],
-    tool_correctness: ["schema_check", "tool:fetch_inventory"],
-    recovery: ["fault:429", `retries:${Math.round((1 - score) * 4)}`],
-    consistency: ["replays:5", "variance"],
-    robustness: ["paraphrase", "distractor"],
-    safety: ["policy", "injection_probe"],
-    escalation: ["handoff", "ambiguity"],
-    efficiency: ["turns", "redundant_calls"],
+    task_success: ["illustrative", "goal_state"],
+    tool_correctness: ["illustrative", "schema_check"],
+    recovery: ["illustrative", "fault"],
+    consistency: ["illustrative", "repeats:none"],
+    robustness: ["illustrative", "variants:none"],
+    safety: ["illustrative", "policy"],
+    escalation: ["illustrative", "handoff"],
+    efficiency: ["illustrative", "reference_path"],
   };
 
   return {
