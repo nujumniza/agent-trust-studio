@@ -24,10 +24,14 @@ export const Route = createFileRoute("/methodology")({
 });
 
 const LIMITATIONS = [
-  "Scores are produced by a deterministic synthetic model, not by executing a live agent against production systems.",
-  "The task suite is small and hand-authored; it is not a representative sample of real deployments.",
-  "Dimension weights are a working assumption, not an empirically derived result.",
-  "No inter-rater reliability study has been conducted on the evidence annotations.",
+  "Demo mode does not execute an agent: its scores and evidence come from a deterministic synthetic formula and are illustrative only.",
+  "Real mode runs one scenario per run against simulated, in-memory mock tools — not real commerce or production systems.",
+  "Only two hand-authored scenarios exist (refund_reship_v1, safety_incident_escalation_v1); they are not a representative sample of real deployments.",
+  "Consistency and robustness are not evaluated: repeated runs and task variants are not yet implemented.",
+  "Fault injection covers a single fault type (a first-call 503-style inventory error).",
+  "Each real run is a single sample; no repeated-run statistics or confidence intervals are produced.",
+  "Dimension weights and partial-credit values are working assumptions, not empirically derived results.",
+  "No statistical validation, human-agreement study, production benchmarking or industry validation has been conducted.",
   "Results should not be used to certify, rank or market an agent.",
 ];
 
@@ -39,9 +43,13 @@ function MethodologyPage() {
         How TRUST-AI arrives at a number
       </h1>
       <p className="mt-4 max-w-[62ch] text-pretty text-base leading-relaxed text-muted">
-        TRUST-AI treats an agent as an instrument under test. A fixed suite of synthetic tasks is
-        replayed against it, faults are injected at known points, and each behavioural dimension is
-        scored from the resulting trace rather than from the agent's own account of what it did.
+        TRUST-AI has two modes. <strong className="text-foreground">Demo / simulation</strong>{" "}
+        generates scores and evidence from a deterministic synthetic formula so the interface can be
+        explored; it does not execute an agent or run the listed number of tasks.{" "}
+        <strong className="text-foreground">Real evaluation</strong> executes one selected scenario
+        per run with a live language model against deterministic, in-memory mock tools, records
+        every step as a trace, and scores dimensions from that trace with fixed rules rather than
+        from the agent's own account of what it did.
       </p>
 
       <Disclaimer className="mt-6 max-w-[62ch]" />
@@ -53,17 +61,17 @@ function MethodologyPage() {
             {
               step: "01",
               title: "Task construction",
-              body: "Every task declares a goal state, a reference solution path, an ordering constraint graph over tools, and ground-truth escalation points. All tasks are synthetic.",
+              body: "Real mode currently supports two synthetic scenarios: refund_reship_v1 and safety_incident_escalation_v1. Each declares a goal state, a reference tool-call count, two ordering rules, a forbidden tool and a ground-truth escalation flag. The order, inventory and business environment are simulated.",
             },
             {
               step: "02",
-              title: "Execution & perturbation",
-              body: "Each task is replayed five times, plus paraphrase, typo, distractor and prompt-injection variants. Faults are injected at fixed steps so recovery is comparable across agents.",
+              title: "Execution & fault injection",
+              body: "Each real run executes the selected scenario once with a live model. When fault injection is enabled, the first inventory check returns a 503-style error. Repeated runs and paraphrase, typo, distractor or prompt-injection variants are not run; they are possible future work.",
             },
             {
               step: "03",
               title: "Trace scoring",
-              body: "Scores are assigned from the recorded trace. Each score links to the spans that produced it, so a disputed number can be traced back to the behaviour behind it.",
+              body: "Real-mode scores are assigned deterministically from the recorded trace — no model judges the result. Each score cites the trace events it used. Consistency and robustness are marked not evaluated rather than scored.",
             },
           ].map((s, i) => (
             <Panel key={s.step} delay={80 * (i + 1)}>
@@ -97,7 +105,9 @@ function MethodologyPage() {
           </div>
         </div>
         <p className="mt-3 font-mono text-[11px] text-faint">
-          Overall trust index = Σ (dimension score × weight) × 100. Weights sum to 1.00.
+          Overall index = Σ (score × weight) ÷ Σ (weight), over evaluated dimensions only, × 100.
+          Weights sum to 1.00; not-evaluated dimensions are excluded, so overall values are not
+          directly comparable when different dimensions were evaluated.
         </p>
       </section>
 
@@ -121,10 +131,11 @@ function MethodologyPage() {
         <h2 className="mb-5 font-display text-2xl font-semibold tracking-tight">Data handling</h2>
         <Panel>
           <p className="max-w-[62ch] text-pretty text-sm leading-relaxed text-muted">
-            TRUST-AI runs entirely in your browser. Task instructions, run configurations, results
-            and feedback are stored in local browser storage and are never transmitted. Do not enter
-            personal, customer, health, financial or otherwise sensitive information — the framework
-            is designed for synthetic scenarios only.
+            Demo runs and their feedback are stored only in local browser storage. Real evaluations
+            send the task text to the AI model on the server, and store the run, trace, scores and
+            feedback in the app's database, accessible only from the browser that created them. Do
+            not enter personal, customer, health, financial or otherwise sensitive information — the
+            framework is designed for synthetic scenarios only.
           </p>
         </Panel>
       </section>
